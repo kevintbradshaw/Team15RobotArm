@@ -12,7 +12,7 @@ The Modularized Robotic Arm project is a proof of concept project that's intenti
   - Wireless Communication
   - Camera Interface
   - Hand Tools Integration
-  - 
+
 ![Electrical Systems Overview](https://github.com/kevintbradshaw/Team15RobotArm/tree/master/Project/Images/ElectricalSystemOverview.PNG)
 
 - Raspberry Pi 2 Connections include:
