@@ -1,0 +1,20 @@
+// Use Wiring-Pi Library
+
+#include <wiringPi.h>
+#include <softPwm.h>    // to use the source from the Wiring-Pi library
+
+//initialise wiring pi with one of wiringPiSetup() or wiringPiSetupGpio() functions
+
+int softPwmCreate (int pin, int initialValue, int pwmRange); // use 100 for pwmRange.  then the value can be anything from 
+//0 (off) to 100 (fully on) for the given pin.
+//or use "void softPwmWrite (int pin, int value);"
+
+cc -o myprog myprog.c -lwiringPi -lpthread  // compiling program
+
+
+
+   // Each “cycle” of PWM output takes 10mS with the default range value of 100, so trying to
+   // change the PWM value more than 100 times a second will be futile.
+   // Each pin activated in softPWM mode uses approximately 0.5% of the CPU.
+  //There is currently no way to disable softPWM on a pin while the program in running.
+   // You need to keep your program running to maintain the PWM output!
