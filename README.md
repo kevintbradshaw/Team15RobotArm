@@ -30,3 +30,4 @@ The Raspberry Pi 2 Connections on the project include:
 
 ![Robotic Arm Connections](https://github.com/kevintbradshaw/Team15RobotArm/tree/master/Project/Images/RoboticArmConnections.PNG)
 
+
