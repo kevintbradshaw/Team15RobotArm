@@ -12,8 +12,7 @@ The objective of this project is to design and construct a mechanical appendage 
 
 ![Robotic Arm](https://github.com/kevintbradshaw/Team15RobotArm/tree/master/Project/Images/ArmPicture1.PNG)
 
-The following list shows the particular subsystem interfaces that will be designed in this project.
-- Subsystem Interfaces 
+The following list shows the particular subsystem interfaces that will be designed in this project:
   - Robotic Arm
   - Kinect Control
   - Wireless Communication
