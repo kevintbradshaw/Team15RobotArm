@@ -8,6 +8,8 @@ The Modularized Robotic Arm project is a proof of concept project that's intenti
 
 ![Conceptual Drawing](https://github.com/kevintbradshaw/Team15RobotArm/blob/master/Project/Images/Concept%20drawing%20(2).jpg)
 
+![Conceptual Drawing2](https://github.com/kevintbradshaw/Team15RobotArm/blob/master/Project/Images/Concept%20drawing%202T2.jpg)
+
 **Abstract**
 
 The objective of this project is to design and construct a mechanical appendage that is controlled and operated wirelessly using a custom-designed tracking system. The purpose of this versatile robotic arm is to aid in emergency situations in which human senses and control are critical without having a physical person present. This robot would have six different tool attachments in order to interact with the surrounding environment while keeping the user at a safe distance. The difference between this robot and conventional robots with extensions is that this can be controlled wirelessly through simulation solely based on the user’s movements while still having the ability to use numerous types of tools. This brings the user’s natural movements to the situation combined with machine capabilities so that the problem can be resolved with a human’s direct perspective. Lastly, there would be a mounted utility belt in front of the arm that would be used to change the application of the hand to different kinds of projects. Depending on the situation, the utility belt would be able to revolve around the arm and attach itself to the clamp. This concept combines the mobility of the human arm and the usability of machines.
@@ -21,7 +23,7 @@ The following list shows the particular subsystem interfaces that will be design
   - Camera Interface
   - Hand Tools Integration
 
-![Electrical Systems Overview](https://github.com/kevintbradshaw/Team15RobotArm/blob/master/Project/Images/ElectricalSystemOverview.PNG)
+![Electrical Systems Overview](https://github.com/kevintbradshaw/Team15RobotArm/blob/master/Project/Images/Subsystem%20Block%20Diagram%202.PNG)
 
 The Raspberry Pi 2 Connections on the project include:
   - PWM Driver
