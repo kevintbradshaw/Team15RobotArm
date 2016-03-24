@@ -1,0 +1,133 @@
+Research on PWM dirving Servo motor:
+
+Default Start Position: 90 degree.
+These waveform have a period of 20ms (50HZ): this meets our latency requirement(>= 16Hz)
+Active pulse length is between 1ms and 2ms.
+
+Sending a 1.0ms pulse every 20ms will  move the shaft to the 0 degree position. Duty Cycle = (1/20)*100= 5%
+Sending a 1.5ms pulse every 20ms will  move the shaft to the 90 degree position. Duty Cycle = (1.5/20)*100= 7.5%
+Sending a 2.0ms pulse every 20ms will  move the shaft to the 180 degree position. Duty Cycle = (2/20)*100= 10%
+
+When these servos are commanded to move, they will move to the position and hold that position.
+If an external force pushes against the servo while the servo is holding a position, the servo will resist from moving out of that position. 
+The maximum amount of force the servo can exert is called the torque rating of the servo. 
+Servos will not hold their position forever; the position pulse must be repeated to instruct the servo to stay in position. 
+
+Holding: Send pulses with same length continuously. 
+
+C++ Code Example(Using Raspberry pi driving PWM to control servo motor): http://hertaville.com/2014/07/15/rpiservo/
+
+#ifndef RPI_SERVO_H
+#define RPI_SERVO_H
+
+#include "rpiPWM1.h"
+
+/******************************************************************
+ * rpiServo - This tiny C++ class is able to generate waveforms necessary to
+ * control servos. This class is derived from the rpiPWM1 class.
+ * It consists of a constructor that creates a 50Hz PWM waveform with
+ * a 1.5ms ON time pulse...causing the servo to center itself to the
+ * 90 degree position.
+ *
+ * The class also consists on a setAngle method that sets the angle of
+ * rotation to anything between 0 & 180 degrees
+ * ****************************************************************/
+
+class rpiServo : public rpiPWM1
+{
+
+public:
+    rpiServo();
+    unsigned int  setAngle(unsigned int degrees);
+    static const int ERRDEG=1;
+};
+
+#endif
+-----------------------------------------------------------------------------------------------------
+
+#include "rpiServo.h"
+
+const int rpiServo::ERRDEG;// Error code
+
+/*********************************************************************************
+ * rpiServo constructor - Calls rpiPWM1's overloaded constructor
+ * which basically creates a 50Hz PWM waveform, wih a resolution count of 3600,
+ * a duty cycle of 7.5% (1.5ms ON pulse every 20ms to center servo shaft at
+ * 90 degree position) and traditional PWM mode (rpiPWM1::MSMODE)
+ *
+ * By setting count resolution to 3600 counts, one 20ms period is equivalent to
+ * to 3600 counts, 2ms ON time (180 degree position)  is equivalent to 360 counts
+ * and 1ms ON time (0 degree position) is equivalent to 180 counts. This gives us
+ * 180 counts between the 0 degree position and the 180 degree position hence we
+ * get 1 degree rotation resolution
+ *
+ *********************************************************************************/
+
+rpiServo::rpiServo():rpiPWM1(50.0,3600,7.5,rpiPWM1::MSMODE){
+    // 20ms = 3600 counts (Period)
+    // 2ms = 360 counts (10% duty cycle)  => angle 180
+    // 1ms = 180 counts (5% duty cycle) => angle 0
+    // 1.5ms = 180+90 = 270 (7.5%  duty cycle ) => angle = 90 //servo centered
+}
+----------------------------------------------------------------------------------------------------------
+
+//Test program
+
+#include "rpiServo.h"
+
+int unsigned const delayUs = 2000000;
+
+int main(void){
+
+    rpiServo servo;
+// Increase angle by 18 deg every 'delayUs' microseconds from 90 to 180
+    servo.setAngle(90); // set servo to centre
+    usleep(delayUs);
+    servo.setAngle(108);
+    usleep(delayUs);
+    servo.setAngle(126);
+    usleep(delayUs);
+    servo.setAngle(144);
+    usleep(delayUs);
+    servo.setAngle(162);
+    usleep(delayUs);
+    servo.setAngle(180);
+    usleep(delayUs);
+// Decrease angle by 18 deg every 'delayUs' microseconds from 180 to 90
+    servo.setAngle(162);
+    usleep(delayUs);
+    servo.setAngle(144);
+    usleep(delayUs);
+    servo.setAngle(126);
+    usleep(delayUs);
+    servo.setAngle(108);
+    usleep(delayUs);
+    servo.setAngle(90);
+    usleep(delayUs);
+// Decrease angle by 18 deg every 'delayUs' microseconds from 90 to 0
+    servo.setAngle(72);
+    usleep(delayUs);
+    servo.setAngle(54);
+    usleep(delayUs);
+    servo.setAngle(36);
+    usleep(delayUs);
+    servo.setAngle(18);
+    usleep(delayUs);
+    servo.setAngle(0);
+    usleep(delayUs);
+// Increase angle by 18 deg every 'delayUs' microseconds from 0 to 90
+    servo.setAngle(18);
+    usleep(delayUs);
+    servo.setAngle(36);
+    usleep(delayUs);
+    servo.setAngle(54);
+    usleep(delayUs);
+    servo.setAngle(72);
+    usleep(delayUs);
+    servo.setAngle(90);
+    usleep(delayUs);
+    return 0;
+}
+
+
+
