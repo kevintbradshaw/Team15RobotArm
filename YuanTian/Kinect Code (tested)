@@ -1,0 +1,58 @@
+
+
+//this is the code section for Kinect to track arm movements. All rights resevered to Yuan Tian
+//**************************************************************************************************
+Start with NuiInitialize. This turns the Kinect on, so it’s sort of important.
+◦Create a NUI_SKELETON_FRAME to stuff your data into.
+◦Every time you want new data, call NuiSkeletonGetNextFrame.
+◦Look in your frame for some people. Remember to check all six slots in the SkeletonData array.
+◦When you find a person, go into their NUI_SKELETON_DATA and get whatever you need from there, usually information from SkeletonPositions.
+◦When you’re done, close everything with NuiShutdown.
+//***************************************************************************************************
+
+//stdafx.h
+// stdafx.h : include file for standard system include files,
+// or project specific include files that are used frequently, but
+// are changed infrequently
+//
+
+#pragma once
+
+#include "targetver.h"
+
+#include <stdio.h>
+#include <tchar.h>
+#include <iostream>
+#include <Windows.h>
+#include <NuiApi.h>
+
+
+//main
+
+// Senior Design(Skeleton Tracking).cpp : Defines the entry point for the console application.
+//
+
+using namespace std;
+#include "stdafx.h"
+#include <iostream>
+#include <Windows.h>
+#include <NuiApi.h>
+int main()
+{
+	NuiInitialize(NUI_INITIALIZE_FLAG_USES_SKELETON);   //enable the kinect
+	NUI_SKELETON_FRAME ourframe;                        //Create a skeleton object named ourframe
+	while (1)                                           //For all of time
+	{
+		NuiSkeletonGetNextFrame(0, &ourframe); //Get a frame and stuff it into ourframe
+		for (int i = 0; i < 6; i++)               //Six times, because the Kinect has space to track six people
+		{
+			if (ourframe.SkeletonData[i].eTrackingState == NUI_SKELETON_TRACKED)    //See more on this line below
+				cout << "Right Hand: "<<'\n';                                         //Print "Right hand:"
+			cout <<"x position "<< ourframe.SkeletonData[i].SkeletonPositions[NUI_SKELETON_POSITION_HAND_RIGHT].x << endl; //See more on this line below
+			cout <<"y position "<< ourframe.SkeletonData[i].SkeletonPositions[NUI_SKELETON_POSITION_HAND_RIGHT].y << endl; //See more on this line below
+			cout <<"z position "<< ourframe.SkeletonData[i].SkeletonPositions[NUI_SKELETON_POSITION_HAND_RIGHT].z << endl; //See more on this line below
+			usleep(1000);                                                          //delay function
+		}
+		system("cls");//Clear the screen
+	}
+}
