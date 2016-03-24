@@ -75,7 +75,7 @@ rpiServo::rpiServo():rpiPWM1(50.0,3600,7.5,rpiPWM1::MSMODE){
 
 #include "rpiServo.h"
 
-int unsigned const delayUs = 2000000;
+int unsigned const delayUs = 2000000; 
 
 int main(void){
 
