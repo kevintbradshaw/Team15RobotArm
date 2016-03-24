@@ -1,7 +1,7 @@
 Research on PWM dirving Servo motor:
 
 Default Start Position: 90 degree.
-These waveform have a period of 20ms (50HZ): this meets our latency requirement(>= 16Hz)
+waveforms have a period of 20ms (50HZ): this meets our latency requirement(>= 16Hz)
 Active pulse length is between 1ms and 2ms.
 
 Sending a 1.0ms pulse every 20ms will  move the shaft to the 0 degree position. Duty Cycle = (1/20)*100= 5%
