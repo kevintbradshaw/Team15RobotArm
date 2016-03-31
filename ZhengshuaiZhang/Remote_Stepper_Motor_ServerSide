@@ -1,0 +1,134 @@
+#!/usr/bin/env python
+import tornado.httpserver
+import tornado.websocket
+import tornado.ioloop
+import tornado.web
+import RPi.GPIO as GPIO
+import time
+
+class stepMotor:
+	
+  #init gpio and rotate motor to initial position (0 degrees)
+  def __init__(self, motor_A, motor_B, motor_C, motor_D, sensor):
+	
+    self.sensor = sensor
+    self.motor_A = motor_A
+    self.motor_B = motor_B
+    self.motor_C = motor_C
+    self.motor_D = motor_D
+		
+    self.halfStepping = [[1,0,1,0],[1,0,0,0],[1,0,0,1],[0,0,0,1],[0,1,0,1],[0,1,0,0],[0,1,1,0],[0,0,1,0]]
+    self.motorPosDeg = 0	#current motor position in degrees [0,360]
+    self.stepPointer = 0	
+		
+    #unipolar motor wiring to RPi
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setup(sensor,GPIO.IN)
+    GPIO.setup(motor_A, GPIO.OUT)
+    GPIO.setup(motor_B, GPIO.OUT)
+    GPIO.setup(motor_C, GPIO.OUT)
+    GPIO.setup(motor_D, GPIO.OUT)
+		
+    self.initPos()
+
+  #rotate motor in clockwise direction
+  def rotateR(self, noSteps, speed):
+	
+    self.makeStep(self.halfStepping[self.stepPointer])
+    for i in range (0, noSteps):
+			
+      if self.stepPointer == 7:
+        self.stepPointer = 0
+      else:
+        self.stepPointer += 1
+			
+    self.makeStep(self.halfStepping[self.stepPointer])
+    time.sleep(speed)
+		
+    self.turnOff()
+    self.motorPosDeg -= noSteps*3.75
+    if (self.motorPosDeg<0):
+      self.motorPosDeg = 360 + self.motorPosDeg
+	
+  #rotate motor in counterclockwise direction
+  def rotateL(self, noSteps, speed):
+		
+    self.makeStep(self.halfStepping[self.stepPointer])
+    for i in range (0, noSteps):
+			
+      if self.stepPointer == 0:
+        self.stepPointer = 7
+      else:
+        self.stepPointer -= 1
+				
+    self.makeStep(self.halfStepping[self.stepPointer])
+    time.sleep(speed)
+		
+    self.turnOff()
+    self.motorPosDeg += noSteps*3.75
+    if (self.motorPosDeg >= 360):
+      self.motorPosDeg = self.motorPosDeg - 360
+	
+  #rotate motor to specific position
+  def rotateToAngle(self, desiredAngle, speed):
+
+    deltaAngle = abs(self.motorPosDeg - desiredAngle)
+
+    if(desiredAngle > self.motorPosDeg):
+      if(deltaAngle >= 180):
+        self.rotateR(int((360-deltaAngle)/3.75),speed)
+      else:
+        self.rotateL(int(deltaAngle/3.75),speed)
+    else:
+      if(deltaAngle >= 180):
+        self.rotateL(int((360-deltaAngle)/3.75),speed)
+      else:
+        self.rotateR(int(deltaAngle/3.75),speed)
+
+				
+  #go to initial position defined by optical sensor
+  def initPos(self):
+
+    while (GPIO.input(self.sensor)):
+      self.rotateR(1, 0.02)
+		
+    self.motorPosDeg = 0
+
+		
+  #turn coils off
+  def turnOff(self):
+
+    GPIO.output(self.motor_A, False)
+    GPIO.output(self.motor_B, False)
+    GPIO.output(self.motor_C, False)
+    GPIO.output(self.motor_D, False)
+		
+  #make single step	
+  def makeStep(self, coil_state):
+		
+    GPIO.output(self.motor_A, coil_state[0])
+    GPIO.output(self.motor_B, coil_state[1])
+    GPIO.output(self.motor_C, coil_state[2])
+    GPIO.output(self.motor_D, coil_state[3])
+
+class WSHandler(tornado.websocket.WebSocketHandler):
+
+  def open(self):
+    print 'Connected.\n' 
+    self.stepper = stepMotor(17,22,23,24,18)
+
+  def on_message(self, message):
+    print 'received message: %s\n' %message
+    data = message.split(";")
+    self.stepper.rotateToAngle(float(data[0]), float(data[1]))
+
+  def on_close(self):
+    print 'connection closed\n'
+
+application = tornado.web.Application([(r'/ws', WSHandler),])
+
+if __name__ == "__main__":
+  http_server = tornado.httpserver.HTTPServer(application)
+  http_server.listen(8888)
+  main_loop = tornado.ioloop.IOLoop.instance()
+  main_loop.start()
