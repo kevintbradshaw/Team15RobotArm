@@ -1,0 +1,53 @@
+<!doctype html>
+<html>
+<head>
+  <title>Remote stepper motor control</title>
+  <meta charset="utf-8" />
+  <style>
+    .col-centered{
+    float: none;
+    text-align:center;
+    margin: 0 auto;
+  }
+  </style>
+
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Bootstrap -->
+  <!-- Latest compiled and minified CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+
+  <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+  <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+  <!--[if lt IE 9]>
+  <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+  <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+  <![endif]-->
+
+  <script src="http://code.jquery.com/jquery.min.js"></script>
+  <script src="http://d3js.org/d3.v3.min.js"></script>
+
+  <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+  <!--<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script> -->
+  <!-- Include all compiled plugins (below), or include individual files as needed -->
+
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+</head>
+<body>
+  <div class="container">
+    <div class="row">
+      <div id="wrapper" class="col-xs-12 col-md-6 col-lg-4 col-centered" >
+        <h2>Stepper motor control</h2>
+        <label id="conn_text">Connection status: Connecting!</label><br />
+        <br />
+      </div>
+    </div>
+  </div>
+<script>
+
+//...more code to add
+
+</script>	
+</body>
+</html>
