@@ -1,0 +1,19 @@
+School network is WPA2-Enterprise thus need to connect that way.
+
+explantion difference:WPA vs WPA2
+http://www.linuxjournal.com/article/8017?page=0,0
+http://www.linuxjournal.com/article/8095
+
+what is the following   school/raspberry pi ip addresses
+address   165.91.39.50   nonstatic
+netmask  255.255.255.0 static
+network  165.91.0.0   nonstatic, relies on address
+broadcast 10.201.35.225  static
+gateway of university wifi: 165.91.34.1 static
+
+
+
+School internet information 
+Internet protocal
+Gateway IP address
+
