@@ -1,9 +1,12 @@
 School network is WPA2-Enterprise thus need to connect that way.
 
+Failed attempt: Do not try 
+
+Data/information from failed attempt- may be useful for other case. 
+
 explantion difference:WPA vs WPA2
 http://www.linuxjournal.com/article/8017?page=0,0
 http://www.linuxjournal.com/article/8095
-
 what is the following   school/raspberry pi ip addresses
 address   165.91.39.50   nonstatic
 netmask  255.255.255.0 static
@@ -11,9 +14,22 @@ network  165.91.0.0   nonstatic, relies on address
 broadcast 10.201.35.225  static
 gateway of university wifi: 165.91.34.1 static
 
+Successful attempt:
+Primary source:https://support.che.tamu.edu/knowledgebase.php?article=11
+for configure the wpa_supplicant file and input the following. 
+Reboot.
+
+Command to input for next time:
+ifconfig #to check wlan0 ip address
+sudo nano /etc/wpa_supplicant/wpa_supplicant
+     ssid=”tamulink-wpa”
+     scan_ssid=1
+     key_mgmt=WPA-EAP
+     eap=PEAP
+     identity=”YOUR_NET_ID”
+     password=”YOUR_TAMU_PASSWORD”
+     pairwise=CCMP
+save and reboot
 
 
-School internet information 
-Internet protocal
-Gateway IP address
-
+so simple yet so easy to overlook...
