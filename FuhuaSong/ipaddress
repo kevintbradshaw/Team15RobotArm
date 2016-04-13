@@ -21,7 +21,7 @@ Reboot.
 
 Command to input for next time:
 ifconfig #to check wlan0 ip address
-sudo nano /etc/wpa_supplicant/wpa_supplicant
+sudo nano /etc/wpa_supplicant/wpa_supplicant.conf
      ssid=”tamulink-wpa”
      scan_ssid=1
      key_mgmt=WPA-EAP
