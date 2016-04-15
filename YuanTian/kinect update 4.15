@@ -1,3 +1,8 @@
+// This update includes the subroutines calibrating and saving user arm information
+// Due to the connection to raspberry pi2 has not been set up yet, only the logic and the syntax can be checked. The actual test
+// would be done as soon the connection is set up.
+// This update to test version code costs 5 hours of coding on April 14.2016. 
+
 #include"Simple_window.h"
 #include"Graph.h"
 #include"function.h"
@@ -113,7 +118,7 @@ public:
 class calibr_data{
 	double user_hand_x_left;		//Cali_step=1    left boundary
 	double user_hand_x_right;		//Cali_step=0    right boundary
-	double user_origin_elbow_x;		//Cali_step=3    origin position
+	double user_origin_elbow_x;		//Cali_step=3    origin position of user arm
 	double user_origin_elbow_y;
 	double user_origin_elbow_z;
 	double user_origin_wrist_x;
@@ -168,8 +173,8 @@ class MyTimer : public Fl_Box {
 		MyTimer *o = (MyTimer*)userdata;
 		if (o->flag){
 			NUI_SKELETON_FRAME ourframe;
-			if ((o->Count_sec) == 1199)
-			{                                  //3
+			if ((o->Count_sec) == 1199)          //Timer
+			{                                  
 				o->Count_sec = 0;
 				if (o->Count_min == 59)
 				{
@@ -180,17 +185,17 @@ class MyTimer : public Fl_Box {
 					o->Count_min++;
 				}
 
-			}                                  //3
-			else{                              //4
+			}                                  
+			else{                              
 				o->Count_sec++;
 				o->Count_sec_cali++;
 			}
 			NuiSkeletonGetNextFrame(0, &ourframe);
-			for (int i = 0; i < 6; i++){
+			for (int i = 0; i < 6; i++){                 //Kinect can track 6 people
 				if (ourframe.SkeletonData[i].eTrackingState == NUI_SKELETON_TRACKED){
-					if (o->stage.get_stage() == 0){
+					if (o->stage.get_stage() == 0){             //stage 0: Calibration stage
 						o->Shoulder_center = ourframe.SkeletonData[i].SkeletonPositions[NUI_SKELETON_POSITION_SHOULDER_CENTER].z;
-						if (o->Shoulder_center<1.05&&o->Shoulder_center>0.95)
+						if (o->Shoulder_center<1.05&&o->Shoulder_center>0.95)      //check user's depth, make sure user is in predefined sampling range
 						{
 							o->logic.set_a1(true);
 						}
@@ -199,19 +204,19 @@ class MyTimer : public Fl_Box {
 						}
 
 						if (o->logic.get_a1 == true){
-							switch (o->Cali_step){
+							switch (o->Cali_step){            //three data streams of the user have to be saved 
 							case 0:
 								if (o->logic.get_a2 == false){
 									o->temp_count = o->Count_sec_cali;
 									o->logic.set_a2(true);
 								}
 								else{
-									if (o->Count_sec_cali == (o->temp_count + 10))
+									if (o->Count_sec_cali == (o->temp_count + 10))     // First user sampling window is 10 seconds 
 									{
 										o->user.set_uhxr(ourframe.SkeletonData[i].SkeletonPositions[NUI_SKELETON_POSITION_WRIST_RIGHT].x);
-										o->Cali_step = 1;
+										o->Cali_step = 1;     // go to the next step in calibration stage
 									}
-									else{}
+									else{}                        // Do nothing
 								}
 								break;
 							case 1:
@@ -255,7 +260,7 @@ class MyTimer : public Fl_Box {
 							//user hasn't enter the 0.95-1.05
 						}
 					}
-					if (o->stage.get_stage() == 1){
+					if (o->stage.get_stage() == 1){                   //stage 1: normal mimicking stage
 						o->res_Hand_X = ourframe.SkeletonData[i].SkeletonPositions[NUI_SKELETON_POSITION_WRIST_RIGHT].x;
 						o->res_Hand_Y = ourframe.SkeletonData[i].SkeletonPositions[NUI_SKELETON_POSITION_WRIST_RIGHT].y;
 						o->res_Hand_Z = ourframe.SkeletonData[i].SkeletonPositions[NUI_SKELETON_POSITION_WRIST_RIGHT].z;
@@ -328,7 +333,7 @@ class MyTimer : public Fl_Box {
 		
 	}
 
-public:
+public:                               //Arrays and variables for tracking and saving
 	double array_hand_X[1];
 	//double array_theta1[1];
 	double array_Elbow_Y[1];
