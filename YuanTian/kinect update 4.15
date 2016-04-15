@@ -1,0 +1,549 @@
+#include"Simple_window.h"
+#include"Graph.h"
+#include"function.h"
+#include <Windows.h>
+#include <NuiApi.h>
+#include <FL/Fl.H>
+#include <FL/Fl_Double_Window.H>
+#include <FL/Fl_Box.H>
+#include <FL/fl_draw.H>
+#include <math.h>
+#include <stdio.h>
+#include <time.h>
+#include "function.h"
+#include <stdlib.h>
+#include <FL/Fl_Button.H>
+#include "Window.h"
+#include "Graph.h"
+#include "Point.h"
+#include <FL/Fl_Text_Display.H>
+#include <string>
+
+
+#define BG_COLOR   45
+#define TICK_COLOR 50
+#define CIRC_COLOR 0
+
+
+//upper limb of arm
+class vector_1{
+	double x;
+	double y;
+	double z;
+
+public:
+	void set_x(double xval){
+		x = xval;
+	}
+	void set_y(double yval){
+		y = yval;
+	}
+	void set_z(double zval){
+		z = zval;
+	}
+	double get_x(void){
+		return x;
+	}
+	double get_y(void){
+		return y;
+	}
+	double get_z(void){
+		return z;
+	}
+};
+
+//lower limb of arm
+class vector_2{
+	double x;
+	double y;
+	double z;
+public:
+	void set_x(double xval){
+		x = xval;
+	}
+	void set_y(double yval){
+		y = yval;
+	}
+	void set_z(double zval){
+		z = zval;
+	}
+	double get_x(void){
+		return x;
+	}
+	double get_y(void){
+		return y;
+	}
+	double get_z(void){
+		return z;
+	}
+};
+
+// bool functions
+class logic{
+	bool a1;  
+	bool a2;
+	bool a3;
+	bool a4;
+	bool a5;
+public:
+	logic::logic() :a1(false), a2(false), a3(false),a4(false),a5(false){}
+	bool get_a1(void){ return a1;}
+	bool get_a2(void){ return a2;}
+	bool get_a3(void){ return a3;}
+	bool get_a4(void){ return a4;}
+	bool get_a5(void){ return a5;}
+
+	void set_a1(bool xa1){ a1 = xa1; }
+	void set_a2(bool xa2){ a2 = xa2; }
+	void set_a3(bool xa3){ a3 = xa3; }
+	void set_a4(bool xa4){ a3 = xa4; }
+	void set_a5(bool xa5){ a3 = xa5; }
+};
+
+
+class stage{
+	int StageNumber;
+public:
+	stage::stage() : StageNumber(0){};
+	void set_stage(int x){ StageNumber = x; }
+	int get_stage(void){ return StageNumber; }
+};
+
+
+class calibr_data{
+	double user_hand_x_left;		//Cali_step=1    left boundary
+	double user_hand_x_right;		//Cali_step=0    right boundary
+	double user_origin_elbow_x;		//Cali_step=3    origin position
+	double user_origin_elbow_y;
+	double user_origin_elbow_z;
+	double user_origin_wrist_x;
+	double user_origin_wrist_y;
+	double user_origin_wrist_z;
+
+public:
+	calibr_data::calibr_data() :user_hand_x_left(0), 
+		user_hand_x_right(0), user_origin_elbow_x(0), 
+		user_origin_elbow_y(0), user_origin_elbow_z(0), 
+		user_origin_wrist_x(0), user_origin_wrist_y(0),
+		user_origin_wrist_z(0){}
+	void set_uhxr(double x){ user_hand_x_right = x; }
+	void set_uhxl(double x){ user_hand_x_left = x; }
+	void set_uoex(double x){ user_origin_elbow_x = x; }
+	void set_uoey(double x){ user_origin_elbow_y = x; }
+	void set_uoez(double x){ user_origin_elbow_z = x; }
+	void set_uowx(double x){ user_origin_wrist_x = x; }
+	void set_uowy(double x){ user_origin_wrist_y = x; }
+	void set_uowz(double x){ user_origin_wrist_z = x; }
+};
+
+class MyTimer : public Fl_Box {
+
+	void draw() {
+
+
+		// TELL BASE WIDGET TO DRAW ITS BACKGROUND
+		//Fl_Box::draw();
+
+
+
+		buff_Hand_X->text(to_string(res_Hand_X).c_str());
+		buff_Hand_Y->text(to_string(res_Hand_Y).c_str());
+		buff_Hand_Z->text(to_string(res_Hand_Z).c_str());
+		buff_Elbow_X->text(to_string(res_Elbow_X).c_str());
+		buff_Elbow_Y->text(to_string(res_Elbow_Y).c_str());
+		buff_Elbow_Z->text(to_string(res_Elbow_Z).c_str());
+		buff_Shoulder_X->text(to_string(res_Elbow_X).c_str());
+		buff_Shoulder_Y->text(to_string(res_Elbow_Y).c_str());
+		buff_Shoulder_Z->text(to_string(res_Elbow_Z).c_str());
+		buff_diff_Hand_X->text(to_string(diff_Hand_X).c_str());
+		buff_diff_Elbow_Y->text(to_string(diff_Elbow_Y).c_str());
+
+		buff2->text(to_string(Count_sec/20).c_str());
+		buff3->text(to_string(Count_min).c_str());
+		buff4->text(to_string(Count_hr).c_str());
+		
+	}
+	
+	static void Timer_CB(void *userdata) {
+		MyTimer *o = (MyTimer*)userdata;
+		if (o->flag){
+			NUI_SKELETON_FRAME ourframe;
+			if ((o->Count_sec) == 1199)
+			{                                  //3
+				o->Count_sec = 0;
+				if (o->Count_min == 59)
+				{
+					o->Count_min = 0;
+					o->Count_hr++;
+				}
+				else{
+					o->Count_min++;
+				}
+
+			}                                  //3
+			else{                              //4
+				o->Count_sec++;
+				o->Count_sec_cali++;
+			}
+			NuiSkeletonGetNextFrame(0, &ourframe);
+			for (int i = 0; i < 6; i++){
+				if (ourframe.SkeletonData[i].eTrackingState == NUI_SKELETON_TRACKED){
+					if (o->stage.get_stage() == 0){
+						o->Shoulder_center = ourframe.SkeletonData[i].SkeletonPositions[NUI_SKELETON_POSITION_SHOULDER_CENTER].z;
+						if (o->Shoulder_center<1.05&&o->Shoulder_center>0.95)
+						{
+							o->logic.set_a1(true);
+						}
+						else {
+							o->logic.set_a1(false);
+						}
+
+						if (o->logic.get_a1 == true){
+							switch (o->Cali_step){
+							case 0:
+								if (o->logic.get_a2 == false){
+									o->temp_count = o->Count_sec_cali;
+									o->logic.set_a2(true);
+								}
+								else{
+									if (o->Count_sec_cali == (o->temp_count + 10))
+									{
+										o->user.set_uhxr(ourframe.SkeletonData[i].SkeletonPositions[NUI_SKELETON_POSITION_WRIST_RIGHT].x);
+										o->Cali_step = 1;
+									}
+									else{}
+								}
+								break;
+							case 1:
+								if (o->logic.get_a3 == false){
+									o->temp_count = o->Count_sec_cali;
+									o->logic.set_a3(true);
+								}
+								else{
+									if (o->Count_sec_cali == (o->temp_count + 10))
+									{
+										o->user.set_uhxl(ourframe.SkeletonData[i].SkeletonPositions[NUI_SKELETON_POSITION_WRIST_RIGHT].x);
+										o->Cali_step = 2;
+									}
+									else{}
+								}
+								break;
+							case 2:
+								if (o->logic.get_a4 == false){
+									o->temp_count = o->Count_sec_cali;
+									o->logic.set_a4(true);
+								}
+								else{
+									if (o->Count_sec_cali == (o->temp_count + 10))
+									{
+										o->user.set_uoex(ourframe.SkeletonData[i].SkeletonPositions[NUI_SKELETON_POSITION_ELBOW_RIGHT].x);
+										o->user.set_uoey(ourframe.SkeletonData[i].SkeletonPositions[NUI_SKELETON_POSITION_ELBOW_RIGHT].y);
+										o->user.set_uoez(ourframe.SkeletonData[i].SkeletonPositions[NUI_SKELETON_POSITION_ELBOW_RIGHT].z);
+										o->user.set_uowx(ourframe.SkeletonData[i].SkeletonPositions[NUI_SKELETON_POSITION_WRIST_RIGHT].x);
+										o->user.set_uowy(ourframe.SkeletonData[i].SkeletonPositions[NUI_SKELETON_POSITION_WRIST_RIGHT].y);
+										o->user.set_uowz(ourframe.SkeletonData[i].SkeletonPositions[NUI_SKELETON_POSITION_WRIST_RIGHT].z);
+										o->stage.set_stage(1);
+									}
+									else{}
+								}
+								break;
+							default:
+								break;
+							}
+						}
+						else{
+							//user hasn't enter the 0.95-1.05
+						}
+					}
+					if (o->stage.get_stage() == 1){
+						o->res_Hand_X = ourframe.SkeletonData[i].SkeletonPositions[NUI_SKELETON_POSITION_WRIST_RIGHT].x;
+						o->res_Hand_Y = ourframe.SkeletonData[i].SkeletonPositions[NUI_SKELETON_POSITION_WRIST_RIGHT].y;
+						o->res_Hand_Z = ourframe.SkeletonData[i].SkeletonPositions[NUI_SKELETON_POSITION_WRIST_RIGHT].z;
+
+						o->res_Elbow_X = ourframe.SkeletonData[i].SkeletonPositions[NUI_SKELETON_POSITION_ELBOW_RIGHT].x;
+						o->res_Elbow_Y = ourframe.SkeletonData[i].SkeletonPositions[NUI_SKELETON_POSITION_ELBOW_RIGHT].y;
+						o->res_Elbow_Z = ourframe.SkeletonData[i].SkeletonPositions[NUI_SKELETON_POSITION_ELBOW_RIGHT].z;
+
+						o->res_Shoulder_X = ourframe.SkeletonData[i].SkeletonPositions[NUI_SKELETON_POSITION_SHOULDER_RIGHT].x;
+						o->res_Shoulder_Y = ourframe.SkeletonData[i].SkeletonPositions[NUI_SKELETON_POSITION_SHOULDER_RIGHT].y;
+						o->res_Shoulder_Z = ourframe.SkeletonData[i].SkeletonPositions[NUI_SKELETON_POSITION_SHOULDER_RIGHT].z;
+
+						o->v1.set_x(o->res_Elbow_X - o->res_Shoulder_X);
+						o->v1.set_y(o->res_Elbow_Y - o->res_Shoulder_Y);
+						o->v1.set_z(o->res_Elbow_Z - o->res_Shoulder_Z);
+
+						o->v2.set_x(o->res_Hand_X - o->res_Elbow_X);
+						o->v2.set_y(o->res_Hand_Y - o->res_Elbow_Y);
+						o->v2.set_z(o->res_Hand_Z - o->res_Elbow_Z);
+
+						o->res_theta1 = acos(((o->v1.get_x()*o->v2.get_x()) + (o->v1.get_y()*o->v2.get_y()) + (o->v1.get_z()*o->v2.get_z())) / (sqrt(pow(o->v1.get_x(), 2) + pow(o->v1.get_y(), 2) + pow(o->v1.get_y(), 2))*sqrt(pow(o->v2.get_x(), 2) + pow(o->v2.get_y(), 2) + pow(o->v2.get_z(), 2))));
+						o->temp_1 = o->array_hand_X[0];
+						//o->temp_2 = o->array_theta1[0];
+						o->temp_3 = o->array_Elbow_Y[0];
+
+						if (o->array_index != 2) {
+							o->array_hand_diff[o->array_index] = o->res_Hand_X;
+							o->array_Elbow_diff[o->array_index] = o->res_Elbow_Y;
+							o->array_index++;
+						}
+						else{
+							o->array_hand_diff[o->array_index] = o->res_Hand_X;
+							o->array_Elbow_diff[o->array_index] = o->res_Elbow_Y;
+							o->array_hand_X[0] = o->array_hand_diff[0] + o->array_hand_diff[1] + o->array_hand_diff[2];
+							o->array_Elbow_Y[0] = o->array_Elbow_diff[0] + o->array_Elbow_diff[1] + o->array_Elbow_diff[2];
+							o->array_index = 0;
+						}
+						o->diff_Hand_X = (o->array_hand_X[0] - o->temp_1);
+						/*cout << o->diff_Hand_X << endl;*/
+						/*cout << o->v1.get_x() << endl;*/
+						//cout << o->res_theta1<< endl;
+
+						o->diff_Elbow_Y = (o->array_Elbow_Y[0] - o->temp_3);
+						//cout << o->diff_Hand_X << endl;
+						//cout << o->diff_Elbow_Y << endl;
+						cout << o->res_theta1 << endl;
+					}
+				}
+				else{
+					//user is out of sampling range of Kinect
+				}
+			}
+			o->redraw();
+		}
+		Fl::repeat_timeout(0.05, Timer_CB, userdata);
+	}
+	
+	
+	static void start_cb(Fl_Widget* o, void* userdata){
+		MyTimer *v = (MyTimer*)userdata;
+		//v->result = 214;
+		v->flag = true;
+	}
+
+	static void End_cb(Fl_Widget* o, void* userdata){
+		MyTimer *v = (MyTimer*)userdata;
+		//v->result = 214;
+		v->flag = false;
+		cout << ((v->Count_sec) / 10) << "seconds" << endl;
+		
+	}
+
+public:
+	double array_hand_X[1];
+	//double array_theta1[1];
+	double array_Elbow_Y[1];
+	double array_hand_diff[3];
+	double array_Elbow_diff[3];
+	double Shoulder_center = 0;
+	vector_1 v1;
+	vector_2 v2;
+	logic logic;
+	stage stage;
+	calibr_data user;
+
+	int Cali_step = 0;
+	
+	double temp_1 = 0;
+	//double temp_2 = 0;
+	double temp_3 = 0;
+
+	double cali_hand_x;
+
+
+	double diff_Hand_X = 0;
+	double diff_Elbow_Y = 0;
+	//double diff_theta1 = 0;
+	//double theta1;
+
+
+
+	bool flag = false;
+	double Count_sec = 0;
+	double Count_min = 0;
+	double Count_hr = 0;
+
+	double Count_sec_cali = 0;
+	double temp_count = 0;
+
+	int array_index = 0;
+	Fl_Button* start = NULL;// button 
+	Fl_Button* End = NULL;
+
+	double res_Hand_X = 0;
+	double res_Hand_Y = 0;
+	double res_Hand_Z = 0;
+	double res_Elbow_X = 0;
+	double res_Elbow_Y = 0;
+	double res_Elbow_Z = 0;
+	double res_Shoulder_X = 0;
+	double res_Shoulder_Y = 0;
+	double res_Shoulder_Z = 0;
+
+	double cali_Hand_X = 0;
+
+	double res_theta1 = 0;
+	double res_diff_Elbow_Y = 0;
+	
+
+
+
+	Fl_Text_Buffer *buff_Hand_X;
+	Fl_Text_Buffer *buff_Hand_Y;
+	Fl_Text_Buffer *buff_Hand_Z;
+	Fl_Text_Buffer *buff_Elbow_X;
+	Fl_Text_Buffer *buff_Elbow_Y;
+	Fl_Text_Buffer *buff_Elbow_Z;
+	Fl_Text_Buffer *buff_Shoulder_X;
+	Fl_Text_Buffer *buff_Shoulder_Y;
+	Fl_Text_Buffer *buff_Shoulder_Z;
+
+	Fl_Text_Buffer *buff_diff_Hand_X;
+	Fl_Text_Buffer *buff_diff_theta1;
+	Fl_Text_Buffer *buff_diff_Elbow_Y;
+
+	
+	Fl_Text_Buffer *buff2;
+	Fl_Text_Buffer *buff3;
+	Fl_Text_Buffer *buff4;
+	
+	Fl_Text_Display *disp_Hand_X;
+	Fl_Text_Display *disp_Hand_Y;
+	Fl_Text_Display *disp_Hand_Z;
+	Fl_Text_Display *disp_Elbow_X;
+	Fl_Text_Display *disp_Elbow_Y;
+	Fl_Text_Display *disp_Elbow_Z;
+	Fl_Text_Display *disp_Shoulder_X;
+	Fl_Text_Display *disp_Shoulder_Y;
+	Fl_Text_Display *disp_Shoulder_Z;
+
+	Fl_Text_Display *disp_diff_Hand_X;
+	Fl_Text_Display *disp_diff_theta1;
+	Fl_Text_Display *disp_diff_Elbow_Y;
+
+
+	
+	Fl_Text_Display *disp2;
+	Fl_Text_Display *disp3;
+	Fl_Text_Display *disp4;
+	
+	// CONSTRUCTOR
+	MyTimer(int X, int Y, int W, int H, const char*L = 0) : Fl_Box(X, Y, W, H, L) {
+
+		//	box(FL_FLAT_BOX);
+		color(BG_COLOR);
+		Fl::add_timeout(0.1, Timer_CB, (void*)this);
+		start = new Fl_Button(x() + 170, y() + h() - 50, 50, 20, "start"); start->callback(start_cb, (void*)this);//define button
+		End = new Fl_Button(x() + 220, y() + h() - 50, 50, 20, "End"); End->callback(End_cb, (void*)this);
+		
+		buff_Hand_X = new Fl_Text_Buffer();
+		buff_Hand_Y = new Fl_Text_Buffer();
+		buff_Hand_Z = new Fl_Text_Buffer();
+
+		buff_Elbow_X = new Fl_Text_Buffer();
+		buff_Elbow_Y = new Fl_Text_Buffer();
+		buff_Elbow_Z = new Fl_Text_Buffer();
+
+		buff_Shoulder_X = new Fl_Text_Buffer();
+		buff_Shoulder_Y = new Fl_Text_Buffer();
+		buff_Shoulder_Z = new Fl_Text_Buffer();
+
+		buff_diff_Hand_X = new Fl_Text_Buffer();
+		buff_diff_theta1 = new Fl_Text_Buffer();
+		buff_diff_Elbow_Y = new Fl_Text_Buffer();
+		
+		buff2 = new Fl_Text_Buffer();
+		buff3 = new Fl_Text_Buffer();
+		buff4 = new Fl_Text_Buffer();
+		
+		disp_Hand_X = new Fl_Text_Display(x() + 44, y() + h() - 250, 80, 30, "Hand X Coordinate");
+		disp_Hand_Y = new Fl_Text_Display(x() + 44, y() + h() - 200, 80, 30, "Hand Y Coordinate");
+		disp_Hand_Z = new Fl_Text_Display(x() + 44, y() + h() - 150, 80, 30, "Hand Z Coordinate");
+		disp_Elbow_X = new Fl_Text_Display(x() + 184, y() + h() - 250, 80, 30, "Elbow X Coordinate");
+		disp_Elbow_Y = new Fl_Text_Display(x() + 184, y() + h() - 200, 80, 30, "Elbow Y Coordinate");
+		disp_Elbow_Z = new Fl_Text_Display(x() + 184, y() + h() - 150, 80, 30, "Elbow Z Coordinate");
+		disp_Shoulder_X = new Fl_Text_Display(x() + 324, y() + h() - 250, 80, 30, "Shoulder X Coordinate");
+		disp_Shoulder_Y = new Fl_Text_Display(x() + 324, y() + h() - 200, 80, 30, "Shoulder Y Coordinate");
+		disp_Shoulder_Z = new Fl_Text_Display(x() + 324, y() + h() - 150, 80, 30, "Shoulder Z Coordinate");
+		
+		disp_diff_Hand_X = new Fl_Text_Display(x() + 44, y() + h() - 300, 80, 30, "Hand X Coordinate Diff");
+		//disp_diff_theta1 = new Fl_Text_Display(x() + 200, y() + h() - 300, 80, 30, "Theta 1 Difference");
+		disp_diff_Elbow_Y = new Fl_Text_Display(x() + 200, y() + h() - 300, 80, 30, "Elbow Y Coordinate Diff");
+
+		disp2 = new Fl_Text_Display(x() + 104, y() + h() - 100, 80, 30, "Second");
+		disp3 = new Fl_Text_Display(x() + 184, y() + h() - 100, 80, 30, "Minite");
+		disp4 = new Fl_Text_Display(x() + 264, y() + h() - 100,80, 30, "Hour");
+		
+		disp_Hand_X->buffer(buff_Hand_X);
+		disp_Hand_Y->buffer(buff_Hand_Y);
+		disp_Hand_Z->buffer(buff_Hand_Z);
+		disp_Elbow_X->buffer(buff_Elbow_X);
+		disp_Elbow_Y->buffer(buff_Elbow_Y);
+		disp_Elbow_Z->buffer(buff_Elbow_Z);
+		disp_Shoulder_X->buffer(buff_Shoulder_X);
+		disp_Shoulder_Y->buffer(buff_Shoulder_Y);
+		disp_Shoulder_Z->buffer(buff_Shoulder_Z);
+		disp_diff_Hand_X->buffer(buff_diff_Hand_X);
+		//disp_diff_theta1->buffer(buff_diff_theta1);
+		disp_diff_Elbow_Y->buffer(buff_diff_Elbow_Y);
+
+		
+		
+		disp2->buffer(buff2);
+		disp3->buffer(buff3);
+		disp4->buffer(buff4);
+		
+		buff_Hand_X->text(to_string(res_Hand_X).c_str());
+		buff_Hand_Y->text(to_string(res_Hand_Y).c_str());
+		buff_Hand_Z->text(to_string(res_Hand_Z).c_str());
+		buff_Elbow_X->text(to_string(res_Elbow_X).c_str());
+		buff_Elbow_Y->text(to_string(res_Elbow_Y).c_str());
+		buff_Elbow_Z->text(to_string(res_Elbow_Z).c_str());
+		buff_Shoulder_X->text(to_string(res_Shoulder_X).c_str());
+		buff_Shoulder_Y->text(to_string(res_Shoulder_Y).c_str());
+		buff_Shoulder_Z->text(to_string(res_Shoulder_Z).c_str());
+		
+		buff_diff_Hand_X->text(to_string(diff_Hand_X).c_str());
+		//buff_diff_theta1->text(to_string(diff_theta1).c_str());
+		buff_diff_Elbow_Y->text(to_string(diff_Elbow_Y).c_str());
+		
+		
+		buff2->text(to_string(Count_sec).c_str());
+		buff3->text(to_string(Count_min).c_str());
+		buff4->text(to_string(Count_hr).c_str());
+
+	}
+};
+
+
+
+// MAIN
+int main() {
+	Graph_lib::Window win(Point(200, 100), 500, 500, "");
+	win.begin();
+	MyTimer tim(10, 10, 400, 400);
+	NuiInitialize(NUI_INITIALIZE_FLAG_USES_SKELETON);
+	win.end();
+	win.show();
+	while (win.shown())Fl::wait();
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
